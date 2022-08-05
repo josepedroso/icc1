@@ -74,7 +74,6 @@ void preenche_LU_Inicial(LU *sis, double **m, args *argumentos)
         preenche_mId(sis, m);
         return;
     }
-    printf("cadelinha filha 2");
     for (int i = 0; i < sis->n; i++)
     {
         for (int j = 0; j < sis->n; j++)
@@ -191,10 +190,9 @@ double **resolveLU(LU *lu)
 {
     double **matriz_Inv = aloca_matriz(lu->n);
     SL *sisL = aloca_sist(lu->n);
-    printf("entrou");
     SL *sisU = aloca_sist(lu->n);
     double *v = aloca_vetor(lu->n);
-    double *r = aloca_vetor(lu->n);
+    //double *r = aloca_vetor(lu->n);
     for (int colunaI = 0; colunaI < lu->n; colunaI++)
     { // coluna da matriz identidade
         // printf("convert m to v \n");
@@ -236,6 +234,8 @@ double **multiplica_matriz(double **m, double **mInv, int tam)
             result[i][j] = 0;
             for (int k = 0; k < tam; k++)
             {
+                //printf("%lf \n", mInv[i][j]);
+
                 result[i][j] += m[i][k] * mInv[k][j];
             }
         }
@@ -249,8 +249,10 @@ double Norma_LU(double **m, int tam)
     {
         for (int j = 0; j < tam; j++)
         {
-            // printf("%lf \n",m[i][j]*void iniSisLin(LU * sis, double coef_max)ma);
+            //printf("%lf \n", m[i][j]);
+             soma = soma + (m[i][j] * m[i][j]);
         }
+        //printf("%lf \n", soma);
     }
     soma = sqrt(soma);
     return soma;
@@ -258,21 +260,19 @@ double Norma_LU(double **m, int tam)
 void refLU(args *argumentos)
 {
     int it = 0;
-    printf("cadelinha numero 1");
     LU *lu = aloca_LU(argumentos);
     double **matriz = aloca_matriz(lu->n);
     double **matriz_Inv = aloca_matriz(lu->n);
     double **result = aloca_matriz(lu->n);
     double **Identidade = aloca_matriz(lu->n);
     double norma = 1;
-    printf("cadelinha numero 2");
 
     Identidade = matriz_inicial(lu->n);
     preenche_LU_Inicial(lu, Identidade, argumentos);
     matriz = copia_matriz(lu->U, lu->n);
     FatoracaoLU(lu);
     matriz_Inv = resolveLU(lu);
-    printf("cadelinha numero 3");
+    lee_matriz(matriz_Inv, lu->n);
     result = multiplica_matriz(matriz, matriz_Inv, lu->n);
     norma = Norma_LU(result, lu->n);
     printf(" %lf ", norma);

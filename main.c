@@ -12,9 +12,9 @@
 int main(int argc, char **argv)
 {
 
-    double tLU;
-    double tSL;
-    double tR;
+    //double tLU;
+    //double tSL;
+    //double tR;
     // inicializa gerador de números aleatóreos
     srand(202201);
     args *argumentos = (args *)malloc(sizeof(args *));

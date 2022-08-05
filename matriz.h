@@ -18,7 +18,7 @@ void eliminacaoGauss(SL * sis);
 
 void preenche_vetorX( SL * sis);
 
-int GaussSeidel(SL * sis,double eplison1,double eplison2);
+void GaussSeidel(SL * sis,double eplison1,double eplison2);
 
 SL *  pregauss(SL * sis);
 
@@ -36,6 +36,6 @@ double * soma_vetor(double * v1,double * v2,int tam);
 
 double soma_residuo(double * v1,int tam);
 
-double * refinamento (SL *sis, double * vetor,double eplison1,double eplison2);
+double* refinamento (SL *sis, double * vetor,double eplison1,double eplison2);
 
 #endif

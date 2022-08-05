@@ -126,10 +126,8 @@ double **aloca_matriz(int n)
 SL *aloca_sist(int n)
 {
 
-    SL *sist = malloc(n * sizeof(SL *));
-    printf("tamanho da matriz \n");
+    SL *sist = malloc(n * n *  sizeof(SL *));
     sist->n = n;
-
     sist->A = aloca_matriz(sist->n);
     sist->B = aloca_vetor(sist->n);
     sist->X = aloca_vetor(sist->n);
@@ -228,6 +226,8 @@ double **copia_matriz(double **matriz_original, int tam)
     {
         for (int w = 0; w < tam; w++)
         {
+                //printf("%lf \n", matriz_original[w][k]);
+
             m[k][w] = matriz_original[k][w];
         }
     }

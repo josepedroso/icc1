@@ -3,6 +3,8 @@
 #include <malloc.h>
 #include "matriz.h"
 #include "time.h"
+#include "dados.h"
+#include "math.h"
 
 void retrossubs(SL *sis)
 {
@@ -85,10 +87,10 @@ SL *pregauss(SL *sis)
     lee_vetor(sis->B, sis->n);
     return sis;
 }
-
-int GaussSeidel(SL *sis, double eplison1, double eplison2)
+//devia devolver int mas nao devolve
+void GaussSeidel(SL *sis, double eplison1, double eplison2)
 {
-    double erro_maior = 0.0;
+    //double erro_maior = 0.0;
     pregauss(sis);
     double erro_temp = 0.0;
     double aux;
@@ -184,10 +186,11 @@ double soma_residuo(double *v1, int tam)
     return soma;
 }
 
-double *refinamento(SL *sis, double *vetor, double eplison1, double eplison2)
+
+double* refinamento(SL *sis, double *vetor, double eplison1, double eplison2)
 {
     SL *novo_sis;
-    double *v_result = aloca_vetor(sis->n); //  SOMA VETOR W OBTIDO A X(i)
+    //double *v_result = aloca_vetor(sis->n); //  SOMA VETOR W OBTIDO A X(i)
     if (criterio_parada1((residuo(sis)), sis->n) < eplison1)
     {
         return sis->X;
@@ -207,5 +210,6 @@ double *refinamento(SL *sis, double *vetor, double eplison1, double eplison2)
             refinamento(novo_sis, residuo(novo_sis), eplison1, eplison2);
         }
     }
+    return novo_sis->X;
     printf("Timestamp: %d\n", (int)time(NULL));
 }
