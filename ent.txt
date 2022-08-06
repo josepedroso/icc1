@@ -1,1 +1,2 @@
 ./invmat e- entrada.txt -s saida.txt -r 3 -i 10
+usar a matriz q mandei no zap como refenrecia 
