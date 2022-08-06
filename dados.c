@@ -160,17 +160,17 @@ void preenche_sis(SL *sis)
  * 
  * @param sis 
  */
-void lee_sis(SL *sis)
+void lee_sis(SL *sis, FILE *out)
 {
     for (int i = 0; i < sis->n; i++)
     {
         for (int j = 0; j < sis->n; j++)
         {
-            printf("%lf ", (sis->A[i][j]));
+            fprintf(out, "%lf ", (sis->A[i][j]));
         }
-        printf(" B %lf", sis->B[i]);
-        printf(" X %lf", sis->X[i]);
-        printf("\n");
+        fprintf(out, " B %lf", sis->B[i]);
+        fprintf(out, " X %lf", sis->X[i]);
+        fprintf(out, "\n");
     }
 }
 

@@ -29,7 +29,7 @@ SL *aloca_sist(int n);
 
 void preenche_sis(SL *sis);
 
-void lee_sis(SL *sis);
+void lee_sis(SL *sis, FILE *out);
 
 double **copia_matriz(double **matriz_original, int tam);
 

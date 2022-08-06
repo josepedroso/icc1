@@ -97,10 +97,10 @@ void preenche_LU(LU *sis, double **mI, double **A)
             {
                 sis->L[i][j] = 1;
             }
-            // printf("coluna %d  linha %d \n",j,i);
+            // fprintf(argumentos->OUT, "coluna %d  linha %d \n",j,i);
             A[i][j] = sis->U[i][j];
         }
-        // printf("vetor linha %d \n",i);
+        // fprintf(argumentos->OUT, "vetor linha %d \n",i);
         sis->X[i] = 0.0;
     }
     preenche_mId(sis, mI);
@@ -118,13 +118,13 @@ void trocalinhaLU(LU *sis, int linha_1, int linha_n)
 void pivoteamentoLU(int colun_inicial, LU *sis)
 {
     int maior_i = colun_inicial;
-    // printf("maior i antes  %d \n ",maior_i);
+    // fprintf(argumentos->OUT, "maior i antes  %d \n ",maior_i);
     for (int i = colun_inicial; i < sis->n; i++)
     {
         if (sis->U[i][colun_inicial] > sis->U[maior_i][colun_inicial])
         {
             maior_i = i;
-            // printf("maior i depois  %d \n ",maior_i);
+            // fprintf(argumentos->OUT, "maior i depois  %d \n ",maior_i);
         }
     }
     trocalinhaLU(sis, colun_inicial, maior_i);
@@ -166,63 +166,62 @@ void convert_LU_SL(LU *lu, SL *sis, double **m, double *v)
         sis->X[i] = 0.0;
     }
 }
-void retrossubsINV(SL *sis)
-{
-    // linha
-    for (int i = 0; i < sis->n; i++)
-    {
-        sis->X[i] = sis->B[i];
-        //  printf("sis->X[i] = sis->B[i]; %lf \n", sis->B[i]);
-        for (int j = 0; j < i; j++)
-        {
-            //  printf("sis->A[i][j] %lf \n", sis->A[i][j]);
-            // printf("sis->X[j] %lf \n", sis->X[j]);
-
-            sis->X[i] -= sis->A[i][j] * sis->X[j];
-            // printf("sis->X[i] %lf \n", sis->X[i]);
-        }
-        sis->X[i] /= sis->A[i][i];
-        //  printf("sis->X[i] %lf \n", sis->X[i]);
+void  convert_V_to_M(double**m,double *v,int coluna,int tam){
+    for (int i = 0; i < tam;i++){
+        m[i][coluna] = v[i];
     }
-}
 
-double **resolveLU(LU *lu)
+}
+double ** resolve_sisL(LU * lu,args *argumentos){
+    SL *sis = aloca_sist(lu->n);
+    double *v = aloca_vetor(lu->n);
+    double **m = aloca_matriz(lu->n);
+    for (int colunaI = 0; colunaI < lu->n; colunaI++){
+        convert_M_to_V(lu->I, v, colunaI, lu->n);
+        convert_LU_SL(lu, sis, lu->L, v);
+         fprintf(argumentos->OUT, " antes de resolver \n");
+        lee_sis(sis, argumentos->OUT);
+        eliminacaoGauss(sis);
+        retrossubs(sis);
+         fprintf(argumentos->OUT, " dps de resolver \n");
+        lee_sis(sis, argumentos->OUT);
+        convert_V_to_M(m, sis->X, colunaI, lu->n);
+        
+    }
+    lee_matriz(m,lu->n,argumentos->OUT);
+    return m;
+}
+double ** resolve_sisU(LU * lu,args *argumentos){
+    SL *sis = aloca_sist(lu->n);
+    double *v = aloca_vetor(lu->n);
+    double **m = aloca_matriz(lu->n);
+    for (int colunaI = 0; colunaI < lu->n; colunaI++){
+        convert_M_to_V(lu->I, v, colunaI, lu->n);
+        convert_LU_SL(lu, sis, lu->U, v);
+         fprintf(argumentos->OUT, " antes de resolver \n");
+        lee_sis(sis, argumentos->OUT);
+        eliminacaoGauss(sis);
+        retrossubs(sis);
+         fprintf(argumentos->OUT, " dps de resolver \n");
+        lee_sis(sis, argumentos->OUT);
+        convert_V_to_M(m, sis->X, colunaI, lu->n);
+        
+    }
+    lee_matriz(m,lu->n,argumentos->OUT);
+    return m;
+}
+double **resolveLU(LU *lu,args *argumentos)
 {
-    double **matriz_Inv = aloca_matriz(lu->n);
-    SL *sisL = aloca_sist(lu->n);
-    SL *sisU = aloca_sist(lu->n);
     double *v = aloca_vetor(lu->n);
     // double *r = aloca_vetor(lu->n);
-    for (int colunaI = 0; colunaI < lu->n; colunaI++)
-    { // coluna da matriz identidade
-        // printf("convert m to v \n");
-        convert_M_to_V(lu->I, v, colunaI, lu->n);
-        convert_LU_SL(lu, sisL, lu->L, v);
-
-        // printf("entrou");
-        eliminacaoGauss(sisL);
-        retrossubs(sisL);
-        convert_LU_SL(lu, sisU, lu->U, sisL->X);
-
-        // printf("SISu \n");
-        // lee_sis(sisU);
-        eliminacaoGauss(sisU);
-        // printf("retro \n");
-        retrossubs(sisU);
-        // printf("SISu \n");
-        // lee_sis(sisU);
-        matriz_Inversa(sisU, colunaI, matriz_Inv);
-    }
+    fprintf(argumentos->OUT, "sisL \n");
+    lu->I = copia_matriz(resolve_sisL(lu,argumentos), lu->n);
+    fprintf(argumentos->OUT, "sisU \n");
+    double ** matriz_Inv = resolve_sisU(lu,argumentos);
     return matriz_Inv;
+    fprintf(argumentos->OUT, "\n //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// ");
 }
-void matriz_Inversa(SL *sisU, int col, double **matriz)
-{
 
-    for (int i = 0; i < sisU->n; i++)
-    {
-        matriz[i][col] = sisU->X[i];
-    }
-}
 void matriz_residuo(double **result, double **m, double **mInv, int tam)
 {
 
@@ -239,6 +238,21 @@ void matriz_residuo(double **result, double **m, double **mInv, int tam)
         }
     }
 }
+void matriz_mult(double **result, double **m, double **mInv, int tam)
+{
+
+    for (int i = 0; i < tam; i++)
+    {
+        for (int j = 0; j < tam; j++)
+        {
+            result[i][j] = 0;
+            for (int k = 0; k < tam; k++)
+            {
+                result[i][j] += m[i][k] * mInv[k][j];
+            }
+        }
+    }
+}
 double Norma_LU(double **m, int tam, int it, FILE *out)
 {
     double soma = 0;
@@ -246,10 +260,10 @@ double Norma_LU(double **m, int tam, int it, FILE *out)
     {
         for (int j = 0; j < tam; j++)
         {
-            // printf("%lf \n", m[i][j]);
+            // fprintf(argumentos->OUT, "%lf \n", m[i][j]);
             soma = soma + (m[i][j] * m[i][j]);
         }
-        // printf("%lf \n", soma);
+        // fprintf(argumentos->OUT, "%lf \n", soma);
     }
     soma = sqrt(soma);
     fprintf(out, "# iter %d: <%.15g>\n", it, soma);
@@ -274,31 +288,37 @@ void refLU(args *argumentos)
 
     double norma = 1;
 
-    Identidade = matriz_inicial(lu->n);
-    preenche_LU_Inicial(lu, Identidade, argumentos);
+    Identidade = matriz_inicial(lu->n); // matriz identidade inicial
+    preenche_LU_Inicial(lu, Identidade, argumentos); // preenche matriz U antes do pivoteamento
     lee_matriz(lu->U, lu->n, argumentos->OUT);
 
-    matriz = copia_matriz(lu->U, lu->n);
-    FatoracaoLU(lu);
-    matriz_Inv = resolveLU(lu);
-    matriz_residuo(result, matriz, matriz_Inv, lu->n);
+    matriz = copia_matriz(lu->U, lu->n); // salva matriz de entrada
+    FatoracaoLU(lu); // converte a matriz L e U EM DOIS SISTEMAS LINEARES
+    matriz_Inv = resolveLU(lu, argumentos);
+    /*matriz_residuo(result, matriz, matriz_Inv, lu->n);
     lee_matriz(matriz_Inv, lu->n, argumentos->OUT);
 
     fprintf(argumentos->OUT, "#\n");
     norma = Norma_LU(result, lu->n, 0, argumentos->OUT);
     it = it + 1;
-
-    while ((norma > EPLISON1) && (it < argumentos->K))
+    */
+    while (it < argumentos->K)
     {
-        matriz_Inv_Ant = copia_matriz(matriz_Inv, lu->n);
-        preenche_LU(lu, result, Identidade);
-        matriz_Inv = resolveLU(lu);
+            if (norma < EPLISON1){
+                break;
+            }
         matriz_residuo(result, matriz, matriz_Inv, lu->n);
+        norma = Norma_LU(result, lu->n, it, argumentos->OUT);
+        it = it + 1;
+        // matriz_Inv_Ant = copia_matriz(matriz_Inv, lu->n);
+        matriz_mult(result,matriz, matriz_Inv, lu->n);        
+        preenche_LU(lu, result, Identidade);
+        matriz_Inv = resolveLU(lu, argumentos);
+       
         //soma_matriz(matriz_Inv, matriz_Inv_Ant, lu->n);
         //lee_matriz(matriz_Inv, lu->n, argumentos->OUT);
 
-        norma = Norma_LU(result, lu->n, it, argumentos->OUT);
-        it = it + 1;
+        
     }
     print_tempo(argumentos->OUT);
     lee_matriz(matriz_Inv, lu->n, argumentos->OUT);

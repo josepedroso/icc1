@@ -34,13 +34,18 @@ void convert_M_to_V(double **Iden, double *v, int coluna, int tam);
 
 void convert_LU_SL(LU *lu, SL *sis, double **m, double *v);
 
-void retrossubsINV(SL *sis);
+void convert_V_to_M(double **m, double *v, int coluna, int tam);
 
-double **resolveLU(LU *lu);
+
+double **resolve_sisL(LU *lu,args *argumentos);
+
+double **resolve_sisU(LU *lu,args *argumentos);
+
+double **resolveLU(LU *lu,args* argumentos);
 
 void matriz_Inversa(SL *sisU, int col, double **matriz);
 
-double **multiplica_matriz(double **m, double **mInv, int tam);
+void matriz_mult(double **result, double **m, double **mInv, int tam);
 
 double Norma_LU(double **m, int tam, int it, FILE *out);
 
