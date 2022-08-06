@@ -12,6 +12,8 @@ typedef struct Sist_LU
     int n;
 } LU;
 
+void matriz_residuo(double **result, double **m, double **mInv, double **id, int tam);
+
 void print_saida(LU *sis);
 
 void iniSisLU(LU * sis, double coef_max);
@@ -40,8 +42,10 @@ void matriz_Inversa(SL *sisU, int col, double **matriz);
 
 double **multiplica_matriz(double **m, double **mInv, int tam);
 
-double Norma_LU(double **m, int tam);
+double Norma_LU(double **m, int tam, int it, FILE *out);
 
 void refLU(args *argumentos);
+
+void print_tempo(FILE *out);
 
 #endif

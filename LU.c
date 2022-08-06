@@ -9,20 +9,19 @@
 #define EPLISON2 0.001
 #define c_max 10
 
-
-void iniSisLU(LU * sis, double coef_max)
+void iniSisLU(LU *sis, double coef_max)
 {
-    unsigned int n = sis->n;
+    int n = sis->n;
     // para gerar valores no intervalo [0,coef_max]
     double invRandMax = ((double)coef_max / (double)RAND_MAX);
 
-    // inicializa sistema normal 
+    // inicializa sistema normal
     // inicializa a matriz A
-    for (unsigned int i = 0; i < n; ++i)
+    for (int i = 0; i < n; ++i)
     {
-        for (unsigned int j = 0; j < n; ++j)
+        for (int j = 0; j < n; ++j)
         {
-            sis->L[i][j] = (double)rand() * invRandMax;
+            sis->U[i][j] = (double)rand() * invRandMax;
         }
         sis->X[i] = 0.0;
         sis->L[i][i] = 1;
@@ -30,7 +29,7 @@ void iniSisLU(LU * sis, double coef_max)
 }
 
 LU *aloca_LU(args *argumentos)
-{   
+{
     int tam;
     argumentos->N ? tam = argumentos->N : fscanf(argumentos->IN, "%d ", &tam);
     LU *sist = malloc(tam * tam * sizeof(LU *));
@@ -69,8 +68,9 @@ void preenche_mId(LU *sis, double **m)
 
 void preenche_LU_Inicial(LU *sis, double **m, args *argumentos)
 {
-    if(argumentos->N){
-        iniSisLU(sis,c_max);
+    if (argumentos->N)
+    {
+        iniSisLU(sis, c_max);
         preenche_mId(sis, m);
         return;
     }
@@ -78,7 +78,7 @@ void preenche_LU_Inicial(LU *sis, double **m, args *argumentos)
     {
         for (int j = 0; j < sis->n; j++)
         {
-            fscanf(argumentos->IN, "%lf ", &(sis->U[i][j])); 
+            fscanf(argumentos->IN, "%lf ", &(sis->U[i][j]));
         }
         sis->X[i] = 0.0;
         sis->L[i][i] = 1;
@@ -192,7 +192,7 @@ double **resolveLU(LU *lu)
     SL *sisL = aloca_sist(lu->n);
     SL *sisU = aloca_sist(lu->n);
     double *v = aloca_vetor(lu->n);
-    //double *r = aloca_vetor(lu->n);
+    // double *r = aloca_vetor(lu->n);
     for (int colunaI = 0; colunaI < lu->n; colunaI++)
     { // coluna da matriz identidade
         // printf("convert m to v \n");
@@ -223,9 +223,8 @@ void matriz_Inversa(SL *sisU, int col, double **matriz)
         matriz[i][col] = sisU->X[i];
     }
 }
-double **multiplica_matriz(double **m, double **mInv, int tam)
+void matriz_residuo(double **result, double **m, double **mInv, double **id, int tam)
 {
-    double **result = aloca_matriz(tam);
 
     for (int i = 0; i < tam; i++)
     {
@@ -234,70 +233,83 @@ double **multiplica_matriz(double **m, double **mInv, int tam)
             result[i][j] = 0;
             for (int k = 0; k < tam; k++)
             {
-                //printf("%lf \n", mInv[i][j]);
-
-                result[i][j] += m[i][k] * mInv[k][j];
+                // printf("%lf \n", mInv[i][j]);
+                result[i][j] = id[i][j] - (m[i][k] * mInv[k][j]);
             }
         }
     }
-    return result;
 }
-double Norma_LU(double **m, int tam)
+double Norma_LU(double **m, int tam, int it, FILE *out)
 {
     double soma = 0;
     for (int i = 0; i < tam; i++)
     {
         for (int j = 0; j < tam; j++)
         {
-            //printf("%lf \n", m[i][j]);
-             soma = soma + (m[i][j] * m[i][j]);
+            // printf("%lf \n", m[i][j]);
+            soma = soma + (m[i][j] * m[i][j]);
         }
-        //printf("%lf \n", soma);
+        // printf("%lf \n", soma);
     }
     soma = sqrt(soma);
+    fprintf(out, "# iter %d: <%.15g>\n", it, soma);
     return soma;
 }
 void refLU(args *argumentos)
 {
+
+    // double tLU;
+    // double tSL;
+    // double tR;
+
     int it = 0;
+
     LU *lu = aloca_LU(argumentos);
+
     double **matriz = aloca_matriz(lu->n);
     double **matriz_Inv = aloca_matriz(lu->n);
     double **result = aloca_matriz(lu->n);
     double **Identidade = aloca_matriz(lu->n);
+    double **matriz_Inv_Ant = aloca_matriz(lu->n);
+
     double norma = 1;
 
     Identidade = matriz_inicial(lu->n);
     preenche_LU_Inicial(lu, Identidade, argumentos);
+    lee_matriz(lu->U, lu->n, argumentos->OUT);
+
     matriz = copia_matriz(lu->U, lu->n);
     FatoracaoLU(lu);
     matriz_Inv = resolveLU(lu);
-    lee_matriz(matriz_Inv, lu->n);
-    result = multiplica_matriz(matriz, matriz_Inv, lu->n);
-    norma = Norma_LU(result, lu->n);
-    printf(" %lf ", norma);
+    matriz_residuo(result, matriz, matriz_Inv, Identidade, lu->n);
+
+    fprintf(argumentos->OUT, "#\n");
+    norma = Norma_LU(result, lu->n, 0, argumentos->OUT);
     it = it + 1;
-    printf(" %d", it);
-    while ((norma > EPLISON1) && (it < 10))
+
+    while ((norma > EPLISON1) && (it < argumentos->K))
     {
+        matriz_Inv_Ant = copia_matriz(matriz_Inv, lu->n);
+
         preenche_LU(lu, result, Identidade);
-        printf(" SEGUNDA VEZ");
         matriz_Inv = resolveLU(lu);
-        result = multiplica_matriz(matriz, matriz_Inv, lu->n);
-        norma = Norma_LU(result, lu->n);
+        matriz_residuo(result, matriz, matriz_Inv, Identidade, lu->n);
+        soma_matriz(matriz_Inv, matriz_Inv_Ant, lu->n);
+        norma = Norma_LU(result, lu->n, it, argumentos->OUT);
         it = it + 1;
-        printf(" %d", it);
     }
+    print_tempo(argumentos->OUT);
+    lee_matriz(matriz_Inv, lu->n, argumentos->OUT);
 }
 
 /**
- * @brief 
- * 
- * @param sis 
+ * @brief
+ *
+ * @param sis
  */
-void print_saida(LU *sis){
-    printf("# Tempo LU: ");
-    printf("# Tempo iter: ");
-    printf("# Tempo residuo: ");
-    lee_matriz(sis->I, sis->n);
+void print_tempo(FILE *out)
+{
+    fprintf(out, "# Tempo LU: \n");
+    fprintf(out, "# Tempo iter: \n");
+    fprintf(out, "# Tempo residuo: \n");
 }

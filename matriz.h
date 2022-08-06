@@ -36,6 +36,8 @@ double * soma_vetor(double * v1,double * v2,int tam);
 
 double soma_residuo(double * v1,int tam);
 
+double **soma_matriz(double **mA, double **mB, int tam);
+
 double* refinamento (SL *sis, double * vetor,double eplison1,double eplison2);
 
 #endif

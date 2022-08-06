@@ -21,7 +21,7 @@ double *aloca_vetor(int n);
 
 double **aloca_matriz(int n);
 
-void lee_matriz(double **m, int n);
+void lee_matriz(double **m, int n, FILE *out);
 
 void lee_vetor(double *v, int n);
 

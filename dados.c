@@ -180,18 +180,18 @@ void lee_sis(SL *sis)
  * @param m 
  * @param n 
  */
-void lee_matriz(double **m, int n)
+void lee_matriz(double **m, int n, FILE *out)
 {
-    printf("%d \n", n);
+    fprintf(out,"%d \n", n);
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < n; j++)
         {
-            printf("%.15g ", (m[i][j]));
+            fprintf(out, "%.15g ", (m[i][j]));
         }
-        printf("\n");
+        fprintf(out,"\n");
     }
-    printf("\n");
+    fprintf(out,"\n");
 }
 
 /**
