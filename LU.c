@@ -223,7 +223,7 @@ void matriz_Inversa(SL *sisU, int col, double **matriz)
         matriz[i][col] = sisU->X[i];
     }
 }
-void matriz_residuo(double **result, double **m, double **mInv, double **id, int tam)
+void matriz_residuo(double **result, double **m, double **mInv, int tam)
 {
 
     for (int i = 0; i < tam; i++)
@@ -233,9 +233,9 @@ void matriz_residuo(double **result, double **m, double **mInv, double **id, int
             result[i][j] = 0;
             for (int k = 0; k < tam; k++)
             {
-                // printf("%lf \n", mInv[i][j]);
-                result[i][j] = id[i][j] - (m[i][k] * mInv[k][j]);
+                result[i][j] += m[i][k] * mInv[k][j];
             }
+            result[i][j] = (i == j ? 1.0 - (result[i][j]) : - (result[i][j]));// ao fazer assim dispensa a identidade
         }
     }
 }
@@ -281,7 +281,8 @@ void refLU(args *argumentos)
     matriz = copia_matriz(lu->U, lu->n);
     FatoracaoLU(lu);
     matriz_Inv = resolveLU(lu);
-    matriz_residuo(result, matriz, matriz_Inv, Identidade, lu->n);
+    matriz_residuo(result, matriz, matriz_Inv, lu->n);
+    lee_matriz(matriz_Inv, lu->n, argumentos->OUT);
 
     fprintf(argumentos->OUT, "#\n");
     norma = Norma_LU(result, lu->n, 0, argumentos->OUT);
@@ -290,11 +291,12 @@ void refLU(args *argumentos)
     while ((norma > EPLISON1) && (it < argumentos->K))
     {
         matriz_Inv_Ant = copia_matriz(matriz_Inv, lu->n);
-
         preenche_LU(lu, result, Identidade);
         matriz_Inv = resolveLU(lu);
-        matriz_residuo(result, matriz, matriz_Inv, Identidade, lu->n);
-        soma_matriz(matriz_Inv, matriz_Inv_Ant, lu->n);
+        matriz_residuo(result, matriz, matriz_Inv, lu->n);
+        //soma_matriz(matriz_Inv, matriz_Inv_Ant, lu->n);
+        //lee_matriz(matriz_Inv, lu->n, argumentos->OUT);
+
         norma = Norma_LU(result, lu->n, it, argumentos->OUT);
         it = it + 1;
     }

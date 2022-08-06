@@ -12,7 +12,7 @@ typedef struct Sist_LU
     int n;
 } LU;
 
-void matriz_residuo(double **result, double **m, double **mInv, double **id, int tam);
+void matriz_residuo(double **result, double **m, double **mInv, int tam);
 
 void print_saida(LU *sis);
 

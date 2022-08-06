@@ -83,8 +83,7 @@ SL *pregauss(SL *sis)
             }
         }
     }
-    lee_matriz(sis->A, sis->n);
-    lee_vetor(sis->B, sis->n);
+    
     return sis;
 }
 //devia devolver int mas nao devolve
@@ -165,16 +164,16 @@ double criterio_parada2(double *r_ant, double *r_dps, int tam)
     }
     return maior_diff;
 }
-double ** soma_matriz(double ** mA, double ** mB, int tam)
+void soma_matriz(double ** mA, double ** mB, int tam)
 { // soma matriz
-    double **m_result = aloca_matriz(tam);
+    //double **m_result = aloca_matriz(tam);
     for (int i = 0; i < tam; i++)
     {
         for( int j = 0 ; j< tam; j++){
-        m_result[i][j] = mA[i][j] + mB[i][j];
+        mA[i][j]  = mA[i][j] + mB[i][j];
         }
     }
-    return m_result;
+    //return m_result;
 } // ax-b
 double *soma_vetor(double *v1, double *v2, int tam)
 { // soma o x anterior ao w  x(i)+w
